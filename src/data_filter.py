@@ -4,6 +4,14 @@ import json
 from gensim import corpora, models, similarities
 
 """
+description:
+
+the origin data format:
+
+id,number,"username","text",parent,"children",depth,label1,"user1",label2,"user2",valid
+
+
+
 Return Function:
 ----------------
 
@@ -53,7 +61,7 @@ def write_to_file(data, file_name):
     data: just the data, always is a LIST
     file_name: contain file_path and file_name exactly,
                for example: "../data/chinese_data.txt"
-
+               type: str
     Returns:
     --------
     None
@@ -88,28 +96,6 @@ def get_stopwords():
 
 
 
-def character_to_vector(texts):
-    """ change all word in the texts to numeric vector
-
-    Parameters:
-    -----------
-    texts: two dimension list
-           format: str list list
-
-    Returns:
-    --------
-    dictionary:
-
-    """
-
-    dictionary = corpora.Dictionary(texts)
-    dictionary.save("../data/words.dict")
-    token2id = dictionary.token2id
-
-    texts_vec = dictionary.doc2bow(texts[0])
-    print texts_vec
-    return dictionary
-
 def main():
     """ the main function
 
@@ -126,9 +112,13 @@ def main():
 
     print "get directory by corpora..."
     dictionary = character_to_vector(texts)
+    for item in dictionary.token2id:
+        print item.encode("utf-8")
 
-
-
+    corpus = [dictionary.doc2bow(text) for text in texts]
+    print corpus
+    print "store the matrix to the disk"
+    corpora.MmCorpus.serialize("../data/Matrix.mm", corpus)
     return
 
 if __name__ == "__main__":
