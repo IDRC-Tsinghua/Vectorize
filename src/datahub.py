@@ -2,7 +2,7 @@
 import utils
 import word_cutting
 from vectorize import Vectorize
-
+import json
 """
 description:
 
@@ -32,7 +32,7 @@ def get_text_from_line(line):
 
 
 
-def get_nodestr_from_origin_line(line, vectorize):
+def get_node_from_origin_line(line, vectorize):
     """ Form a NODE structure from origin line
     Parameters:
     -----------
@@ -42,7 +42,7 @@ def get_nodestr_from_origin_line(line, vectorize):
     vectorize: the vectorize object
     Return:
     -------
-    node-str: an node-structure string
+    node: an node-structure dict
               type: str
               format: {"id": "xx",
                        "number": "xx",
@@ -58,15 +58,16 @@ def get_nodestr_from_origin_line(line, vectorize):
                       }
     """
 
+    data = line.split("\t")
     nodestr = ""
-    node_id = line[0]
-    node_number = line[1]
-    node_name = line[2]
-    node_text = line[3]
-    node_parant = line[4]
+    node_id = data[0]
+    node_number = data[1]
+    node_name = data[2].replace("\"", "")
+    node_text = data[3]
+    node_parent = data[4]
     # skip the children!!!!!
-    node_depth = line[6]
-    node_label = line[7]
+    node_depth = data[6]
+    node_label = data[7]
 
     # text pre-process
     emoji_list, node_text = word_cutting.filter_emoji_from_text(node_text)
@@ -75,10 +76,9 @@ def get_nodestr_from_origin_line(line, vectorize):
 
     # dictionary init
     node_words = word_cutting.cut(node_text)
-    print node_words
     bow_vector = vectorize.get_bow_vector(node_words)
 
-    nodestr = ""
+
     nodejson = {}
     nodejson['id'] = node_id
     nodejson['number'] = node_number
@@ -91,36 +91,47 @@ def get_nodestr_from_origin_line(line, vectorize):
 
     nodejson['emoji'] = emoji_list
     nodejson['mention'] = mention_list
-    nodejson['hashtag_list'] = hashtag_list
+    nodejson['hashtag'] = hashtag_list
 
-    nodestr = json.dump(nodejson)
-    print nodestr
-    return nodestr
+
+    return nodejson
 
 
 
 def main():
     """
     """
+    print "vectorize dict init..."
     vectorize = Vectorize()
     # prepare str list list words
-    lines =utils.get_lines_from_file_useful("../data/Interstellar.tsv")
-    texts = utils.get_text_only_from_lines(lines)
+    vectorize.dict_init_from_file("../data/interstellar.tsv")
 
-    text_filters = []
-    for text in texts:
-        emoji_list, text_filter = word_cutting.filter_emoji_from_text(text)
-        mention_list, text_filter = word_cutting.filter_syntax_from_text(text, '@')
-        hashtag_list, text_filter = word_cutting.filter_syntax_from_text(text, '#')
-        text_filters.append(text_filter)
+    print "load sample data"
+    sample_lines = utils.get_lines_from_file_useful("../data/Interstellar.tsv")
 
-    words_doc = []
-    for text in text_filters:
-        words_doc.append(word_cutting.cut(text))
+    # begin to write files
+    print "begin to write files"
+    temp_id = ""
+    temp_strs = []
+    cur = 0
+    for line in sample_lines:
+        node = get_node_from_origin_line(line, vectorize) # json dict
 
-    vectorize.dict_init(words_doc)
-    print vectorize.get_token2id
 
+        nodestr = json.dumps(node)
+        if temp_id != node.get('id'):
+            with open("../res/res_%d.txt" % cur, "w") as file_ob:
+                print "----write to %d file now ----" % cur
+                for line in temp_strs:
+                    file_ob.write(line + "\n")
+            file_ob.close()
+            # re init
+            cur = cur + 1
+            temp_id = node.get('id')
+            temp_strs = []
+            temp_strs.append(nodestr)
+        else:
+            temp_strs.append(nodestr)
     return
 
 if __name__ == "__main__":
