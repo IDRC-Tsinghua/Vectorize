@@ -67,7 +67,11 @@ def get_node_from_origin_line(line, vectorize):
     node_parent = data[4]
     # skip the children!!!!!
     node_depth = data[6]
-    node_label = data[7]
+    node_valid = data[11]
+    if node_valid != "NULL":
+        node_label = node_valid
+    else:
+        node_label = data[7]
 
     # text pre-process
     emoji_list, node_text = word_cutting.filter_emoji_from_text(node_text)
@@ -132,6 +136,16 @@ def main():
             temp_strs.append(nodestr)
         else:
             temp_strs.append(nodestr)
+
+    if temp_strs != []:
+        with open("../res/res_%d.txt" % cur, "w") as file_ob:
+            print "----write to %d file now ----" % cur
+            for line in temp_strs:
+                file_ob.write(line + "\n")
+        file_ob.close()
+
+
+
     return
 
 if __name__ == "__main__":

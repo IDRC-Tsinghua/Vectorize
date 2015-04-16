@@ -16,19 +16,56 @@ def get_lines_from_file_useful(filepath):
 
     Return:
     -------
-    lines : all data in the file
+    lines_res : all data in the file
             type: str list list
     """
-    lines = []
+    lines_res = []
+
+    # temp varialbe init
+    group_lines = []
+    temp_lines = []
+    cur_groupid = ""
+
+    useful_flag = True
     with open(filepath) as file_ob:
         for line in file_ob:
             data = line.split("\t")
+            group_id = data[0]
             label1 = data[7]
             label2 = data[9]
-            if (label1 == label2) and (label1 != "NULL") and (label1 != "2"):
-                lines.append(line)
-    file_ob.close()
-    return lines
+            valid = data[11]
+
+            # check if is in the same group
+            if group_id != cur_groupid:
+                # not in the samp group
+                # store the old group into group_lines
+                # create a another group item
+                if temp_lines != []:
+                    group_lines.append(temp_lines)
+                # re-init
+                temp_lines = []
+                cur_groupid = group_id
+                useful_flag = True
+            else:
+                # check the flag
+                if useful_flag == False:
+                    continue
+                # check the new line
+                if (label1 == "NULL" or label2 == "NULL") \
+                   or (valid == "NULL" and label1 != label2) \
+                   or (label1 == "2"):
+                    useful_flag = False
+                    # clean the temp_lines
+                    temp_lines = []
+                    continue
+            temp_lines.append(line)
+        # add the last group to group_lines
+        group_lines.append(temp_lines)
+        file_ob.close()
+
+        # get the group_lines of type:str list list
+    lines_res = [text for group in group_lines for text in group]
+    return lines_res
 
 
 def get_texts_from_file(filename):
