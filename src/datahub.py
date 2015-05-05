@@ -66,6 +66,8 @@ def get_node_from_origin_line(line, vectorize):
     node_text = data[3]
     node_parent = data[4]
     # skip the children!!!!!
+    # Update: do not skip the children
+    node_children= data[5]
     node_depth = data[6]
     node_valid = data[11]
     if node_valid != "NULL":
@@ -88,6 +90,7 @@ def get_node_from_origin_line(line, vectorize):
     nodejson['number'] = node_number
     nodejson['name'] = node_name
     nodejson['parent'] = node_parent
+    nodejson['children'] = node_children
     nodejson['depth'] =node_depth
     nodejson['label'] = node_label
 
@@ -105,16 +108,16 @@ def get_node_from_origin_line(line, vectorize):
 def main():
     """
     """
-    print "vectorize dict init..."
+    print "==========vectorize dict init...============"
     vectorize = Vectorize()
     # prepare str list list words
     vectorize.dict_init_from_file("../data/interstellar.tsv")
 
-    print "load sample data"
+    print "==========load sample data==========="
     sample_lines = utils.get_lines_from_file_useful("../data/Interstellar.tsv")
 
     # begin to write files
-    print "begin to write files"
+    print "============begin to write files============"
     temp_id = ""
     temp_strs = []
     cur = 0

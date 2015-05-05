@@ -6,6 +6,14 @@ import re
 from parse import *
 import vec_config
 
+
+def load_thirdparty_words(filepath):
+    """
+    """
+    jieba.load_userdict(filepath)
+    return
+
+
 def cut(text):
     """ cut words to list from jieba
 
@@ -19,12 +27,14 @@ def cut(text):
     list(seg_list):
                     type: str list
     """
+
+
     seg_list = jieba.cut(text, cut_all=False)
     # print " /".join(seg_list)
 
     # filter the stopwords
     stop_words = get_stopwords()
-    seg_list = [word for word in seg_list if word not in stop_words]
+    seg_list = [word for word in seg_list if word.encode("utf-8") not in stop_words]
     return list(seg_list)
 
 """ ================== emoji mention and hashtag process
@@ -41,8 +51,8 @@ def get_stopwords():
 
     Return:
     -------
-    stopwords: the stopwords list
-               type: str list
+    stopwords: the stopwords string
+               type: str
 
     """
     stopwords_list = []
@@ -51,7 +61,7 @@ def get_stopwords():
             stopwords_list.append(line)
         file_ob.close()
 
-    return stopwords_list
+    return ' '.join(stopwords_list)
 
 
 def get_emoji():
@@ -93,7 +103,8 @@ def filter_emoji_from_text(text):
     for emoji in emoji_res:
         text_filter = text_filter.replace(emoji, "")
 
-
+    if emoji_res != []:
+        print emoji, ' '.join(emoji_res)
     return emoji_res, text_filter
 
 def filter_syntax_from_text(text, syntax='@'):
@@ -107,24 +118,49 @@ def filter_syntax_from_text(text, syntax='@'):
             type: char
     """
     mention_list = []
-
+    stop_syntax = [':', '(', ')', ' ', '（', '）']
     c_flag = False
     mention = ""
     for c in text:
-        if c == syntax:
+        # find the mattching begin position
+        if c == syntax and c_flag == False:
             c_flag = True
+            continue
+        # durning the mention getter
         if c_flag == True:
-            if c != ' ':
-                mention = mention + str(c)
-            else:
-                # end mention
-                # delete the syntax char
-                mention_list.append(mention.decode("utf-8")[1:-1])
-                # delete mention from origin text
-                text = text.replace(mention, "")
-                # re_init
-                mention = ""
-                c_flag = False
+            if syntax == '#':
+                if c != syntax:
+                    mention = mention + str(c)
+                else:
+                    # end mention
+                    # delete the syntax char
+                    mention_list.append(mention.decode("utf-8"))
+                    # delete mention from origin text
+                    text = text.replace(mention, "")
+                    # re_init
+                    mention = ""
+                    c_flag = False
+            elif syntax == '@':
+                # if c != ' ' and c != ':' and c != syntax:
+                if c not in stop_syntax and c != syntax:
+                    mention = mention + str(c)
+                else:
+                    # end mention
+                    # delete the syntax char
+                    mention_list.append(mention.decode("utf-8"))
+                    # delete mention from origin text
+                    text = text.replace(mention, "")
+                    # re_init
+                    mention = ""
+                    if c in stop_syntax:
+                        c_flag = False
+                    else: # c = @
+                        c_flag = True
+
+    if mention_list != []:
+        print syntax
+        for mention in mention_list:
+            print mention
     return mention_list, text
 
 def get_weibos():

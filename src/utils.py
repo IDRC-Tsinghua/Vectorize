@@ -28,6 +28,7 @@ def get_lines_from_file_useful(filepath):
 
     useful_flag = True
     with open(filepath) as file_ob:
+        next(file_ob)
         for line in file_ob:
             data = line.split("\t")
             group_id = data[0]
@@ -68,7 +69,7 @@ def get_lines_from_file_useful(filepath):
     return lines_res
 
 
-def get_texts_from_file(filename):
+def get_line_from_file(filename):
     """
 
     """
