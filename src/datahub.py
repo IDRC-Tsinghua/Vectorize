@@ -49,6 +49,7 @@ def get_node_from_origin_line(line, vectorize):
                        "name": "xx",
                        "text": "xx",
                        "parent": "xx",
+                       "children": "{xx, xx, xx}"
                        "depth": "xx",
                        "label": "xx",
                        "vector": "{ k1:v1, k2:v2, k3:v3  }",
@@ -67,7 +68,8 @@ def get_node_from_origin_line(line, vectorize):
     node_parent = data[4]
     # skip the children!!!!!
     # Update: do not skip the children
-    node_children= data[5]
+    child_str = data[5].replace("\"", "")
+    node_children = child_str.split(",")
     node_depth = data[6]
     node_valid = data[11]
     if node_valid != "NULL":
@@ -90,6 +92,7 @@ def get_node_from_origin_line(line, vectorize):
     nodejson['number'] = node_number
     nodejson['name'] = node_name
     nodejson['parent'] = node_parent
+    # update children
     nodejson['children'] = node_children
     nodejson['depth'] =node_depth
     nodejson['label'] = node_label
