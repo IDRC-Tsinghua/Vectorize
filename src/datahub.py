@@ -3,6 +3,7 @@ import utils
 import word_cutting
 from vectorize import Vectorize
 import json
+import operator
 """
 description:
 
@@ -86,7 +87,6 @@ def get_node_from_origin_line(line, vectorize):
     node_words = word_cutting.cut(node_text)
     bow_vector = vectorize.get_bow_vector(node_words)
 
-
     nodejson = {}
     nodejson['id'] = node_id
     nodejson['number'] = node_number
@@ -104,7 +104,7 @@ def get_node_from_origin_line(line, vectorize):
     nodejson['hashtag'] = hashtag_list
 
 
-    return nodejson
+    return nodejson, bow_vector
 
 
 
@@ -124,9 +124,18 @@ def main():
     temp_id = ""
     temp_strs = []
     cur = 0
-    for line in sample_lines:
-        node = get_node_from_origin_line(line, vectorize) # json dict
 
+    print "=========== word appear count stat"
+    word_count_stat = {}
+
+    for line in sample_lines:
+        node, bow_vector = get_node_from_origin_line(line, vectorize) # json dict
+        for [index, cnt] in bow_vector:
+            index = str(index)
+            if word_count_stat.get(index) != None:
+                word_count_stat[index] = word_count_stat[index] + cnt
+            else:
+                word_count_stat[index] = 0
 
         nodestr = json.dumps(node)
         if temp_id != node.get('id'):
@@ -149,6 +158,21 @@ def main():
             for line in temp_strs:
                 file_ob.write(line + "\n")
         file_ob.close()
+
+    sorted_cnt = sorted(word_count_stat.items(), key=operator.itemgetter(1),
+                        reverse=True)
+    # sorted_cnt = sorted_cnt.reverse()
+
+    print_count = 0
+    dictionary_dict = vectorize.get_token2id()
+    for (k,cnt) in sorted_cnt:
+        if print_count > 1000:
+            break
+        for (name, index) in dictionary_dict.items():
+            if index == int(k):
+                print name.encode("utf-8"), cnt
+                break
+        print_count = print_count + 1
 
 
 
