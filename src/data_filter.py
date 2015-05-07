@@ -1,5 +1,5 @@
 # -*- coding=utf-8 -*-
-import config
+import vec_config
 import json
 from gensim import corpora, models, similarities
 

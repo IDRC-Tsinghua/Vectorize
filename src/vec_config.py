@@ -10,3 +10,5 @@ dictionary_path = "../dict/words.dict"
 # emoji path
 emoji_path = "../dict/emoji.txt"
 hashtag_path = "../dict/hashtag.txt"
+
+svm_hmm_generate_data = "../data/svm_hmm_training.txt"

@@ -19,12 +19,13 @@ class Vectorize(object):
 
     def __init__(self):
 
+        word_cutting.load_thirdparty_words("../dict/favourate.txt")
         self.dictionary = None
 
     def dict_init_from_file(self, filepath):
         """
         """
-        lines = utils.get_lines_from_file_useful(filepath)
+        lines = utils.get_line_from_file(filepath)
         texts = utils.get_text_only_from_lines(lines)
         text_filters = []
         for text in texts:
@@ -35,8 +36,12 @@ class Vectorize(object):
         words_doc = []
         for text in text_filters:
             words_doc.append(word_cutting.cut(text))
-        self.dict_init_from_texts(words_doc)
 
+        # filter stop words
+        stop_words = word_cutting.get_stopwords()
+        ## test
+        words_doc = [[word for word in doc if word.encode("utf-8") not in stop_words] for doc in words_doc]
+        self.dict_init_from_texts(words_doc)
         return
 
     def dict_init_from_texts(self, words_texts):
@@ -60,6 +65,12 @@ class Vectorize(object):
     def get_token2id(self):
         return self.dictionary.token2id
 
+    def print_token2id(self):
+        for (k, v) in self.dictionary.token2id.items():
+            #print type(k), type(v)
+            print k.encode("utf-8"), v
+        return
+
     def get_bow_vector(self, words):
         """
 
@@ -70,9 +81,8 @@ class Vectorize(object):
 
 def main():
     vectorize = Vectorize()
-    texts = utils.get_texts_from_file("../data/Ins_text.txt")
-    words_texts = []
-    vectorize.dict_init()
+    vectorize.dict_init_from_file("../data/interstellar.tsv")
+   #  vectorize.print_token2id()
 
     return
 
