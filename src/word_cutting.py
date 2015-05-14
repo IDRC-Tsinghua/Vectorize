@@ -5,7 +5,7 @@ import data_filter
 import re
 from parse import *
 import vec_config
-
+import jieba.posseg as pseg
 
 def load_thirdparty_words(filepath):
     """
@@ -29,9 +29,9 @@ def cut(text):
     """
 
 
-    seg_list = jieba.cut(text, cut_all=False)
+    # seg_list = jieba.cut(text, cut_all=False)
     # print " /".join(seg_list)
-
+    seg_list = pseg.cut(text)
     # filter the stopwords
     stop_words = get_stopwords()
     seg_list = [word for word in seg_list if word.encode("utf-8") not in stop_words]

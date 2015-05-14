@@ -114,10 +114,10 @@ def main():
     print "==========vectorize dict init...============"
     vectorize = Vectorize()
     # prepare str list list words
-    vectorize.dict_init_from_file("../data/interstellar.tsv")
+    vectorize.dict_init_from_file("../data/weibo.tsv")
 
     print "==========load sample data==========="
-    sample_lines = utils.get_lines_from_file_useful("../data/Interstellar.tsv")
+    sample_lines = utils.get_lines_from_file_useful("../data/weibo.tsv")
 
     # begin to write files
     print "============begin to write files============"
@@ -140,7 +140,7 @@ def main():
         nodestr = json.dumps(node)
         if temp_id != node.get('id'):
             with open("../res/res_%d.txt" % cur, "w") as file_ob:
-                print "----write to %d file now ----" % cur
+                # print "----write to %d file now ----" % cur
                 for line in temp_strs:
                     file_ob.write(line + "\n")
             file_ob.close()
@@ -154,7 +154,7 @@ def main():
 
     if temp_strs != []:
         with open("../res/res_%d.txt" % cur, "w") as file_ob:
-            print "----write to %d file now ----" % cur
+            # print "----write to %d file now ----" % cur
             for line in temp_strs:
                 file_ob.write(line + "\n")
         file_ob.close()
@@ -166,11 +166,11 @@ def main():
     print_count = 0
     dictionary_dict = vectorize.get_token2id()
     for (k,cnt) in sorted_cnt:
-        if print_count > 1000:
+        if print_count > 5000:
             break
         for (name, index) in dictionary_dict.items():
             if index == int(k):
-                print name.encode("utf-8"), cnt
+                print index, name.encode("utf-8"), cnt
                 break
         print_count = print_count + 1
 
