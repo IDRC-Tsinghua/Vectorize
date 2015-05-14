@@ -21,6 +21,7 @@ class Vectorize(object):
 
         word_cutting.load_thirdparty_words("../dict/favourate.txt")
         self.dictionary = None
+        self.word_pesg_tbl = {} # the word-pesg hashtable
 
     def dict_init_from_file(self, filepath):
         """
@@ -34,13 +35,25 @@ class Vectorize(object):
             hashtag_list, text_filter = word_cutting.filter_syntax_from_text(text, '#')
             text_filters.append(text_filter)
         words_doc = []
-        for text in text_filters:
-            words_doc.append(word_cutting.cut(text))
 
+        # for text in text_filters:
+        #    words_doc.append(word_cutting.cut(text))
+        for text in text_filters:
+            text_pesg = word_cutting.cut_with_pseg(text)
+            # set the pesg to the hashtable
+            for word_pesg in text_pesg:
+                self.word_pesg_tbl[word_pesg.word] = word_pesg.flag
+
+            doc = []
+            doc = [w.word for w in text_pesg]
+            words_doc.append(doc)
+        
         # filter stop words
         stop_words = word_cutting.get_stopwords()
         ## test
         words_doc = [[word for word in doc if word.encode("utf-8") not in stop_words] for doc in words_doc]
+
+        # words_doc = [[] for doc in words_doc]
         self.dict_init_from_texts(words_doc)
         return
 
@@ -78,13 +91,3 @@ class Vectorize(object):
         assert(self.dictionary != None)
         bow_vector = self.dictionary.doc2bow(words)
         return bow_vector
-
-def main():
-    vectorize = Vectorize()
-    vectorize.dict_init_from_file("../data/interstellar.tsv")
-   #  vectorize.print_token2id()
-
-    return
-
-if __name__ == "__main__":
-    main()

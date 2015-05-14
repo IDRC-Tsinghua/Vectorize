@@ -30,12 +30,20 @@ def cut(text):
     """
 
 
-    # seg_list = jieba.cut(text, cut_all=False)
+    seg_list = jieba.cut(text, cut_all=False)
     # print " /".join(seg_list)
-    seg_list = pseg.cut(text)
+    # seg_list = pseg.cut(text) # w.word w.flag
     # filter the stopwords
     stop_words = get_stopwords()
-    seg_list = [word for word in seg_list if word.encode("utf-8") not in stop_words]
+    seg_list = [w for w in seg_list if w.encode("utf-8") not in stop_words]
+    return list(seg_list)
+
+def cut_with_pseg(text):
+
+    seg_list = pseg.cut(text)
+    stop_words = get_stopwords()
+    seg_list = [w for w in seg_list if w.word.encode("utf-8") not in stop_words]
+    
     return list(seg_list)
 
 """ ================== emoji mention and hashtag process
@@ -158,10 +166,12 @@ def filter_syntax_from_text(text, syntax='@'):
                     else: # c = @
                         c_flag = True
 
+    """                    
     if mention_list != []:
         print syntax
         for mention in mention_list:
             print mention
+    """
     return mention_list, text
 
 def get_weibos():
@@ -175,18 +185,3 @@ def get_weibos():
             if word:
                 weibo_list.append(word.decode("utf-8"))
     return weibo_list
-
-
-
-if __name__ == "__main__":
-
-
-    """
-    emoji_list, text = filter_emoji_from_text("今天天气不错[笑哈哈][草泥马]")
-    print emoji_list, text
-
-    mention_list, text = filter_syntax_from_text("今天天气不错@火神 #天气预报  ", '@')
-    print mention_list, text
-    hashtag_list, text = filter_syntax_from_text(text, '#')
-    print hashtag_list, text
-    """

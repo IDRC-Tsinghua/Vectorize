@@ -46,8 +46,9 @@ def get_node_from_origin_line(line, vectorize):
     node: an node-structure dict
               type: str
               format: {"id": "xx",
+                       "threadid",
                        "number": "xx",
-                       "name": "xx",
+                       "username": "xx",
                        "text": "xx",
                        "parent": "xx",
                        "children": "{xx, xx, xx}"
@@ -62,21 +63,21 @@ def get_node_from_origin_line(line, vectorize):
 
     data = line.split("\t")
     nodestr = ""
-    node_id = data[0]
-    node_number = data[1]
-    node_name = data[2].replace("\"", "")
-    node_text = data[3]
-    node_parent = data[4]
+    node_id = data[1]
+    node_number = data[2]
+    node_name = data[3].replace("\"", "")
+    node_text = data[4]
+    node_parent = data[5]
     # skip the children!!!!!
     # Update: do not skip the children
-    child_str = data[5].replace("\"", "")
+    child_str = data[6].replace("\"", "")
     node_children = child_str.split(",")
-    node_depth = data[6]
-    node_valid = data[11]
+    node_depth = data[7]
+    node_valid = data[12]
     if node_valid != "NULL":
         node_label = node_valid
     else:
-        node_label = data[7]
+        node_label = data[8]
 
     # text pre-process
     emoji_list, node_text = word_cutting.filter_emoji_from_text(node_text)
@@ -86,7 +87,9 @@ def get_node_from_origin_line(line, vectorize):
     # dictionary init
     node_words = word_cutting.cut(node_text)
     bow_vector = vectorize.get_bow_vector(node_words)
-
+    print node_text
+    print bow_vector # test
+    
     nodejson = {}
     nodejson['id'] = node_id
     nodejson['number'] = node_number
@@ -116,8 +119,10 @@ def main():
     # prepare str list list words
     vectorize.dict_init_from_file("../data/weibo.tsv")
 
+    
     print "==========load sample data==========="
     sample_lines = utils.get_lines_from_file_useful("../data/weibo.tsv")
+    print len(sample_lines)
 
     # begin to write files
     print "============begin to write files============"
@@ -165,12 +170,14 @@ def main():
 
     print_count = 0
     dictionary_dict = vectorize.get_token2id()
+
+    pseg_list = "v vd vn vshi vyou vf vx vi vl vg a ad an ag al".split(" ")
     for (k,cnt) in sorted_cnt:
-        if print_count > 5000:
+        if print_count > 1000:
             break
         for (name, index) in dictionary_dict.items():
-            if index == int(k):
-                print index, name.encode("utf-8"), cnt
+            if index == int(k) and vectorize.word_pesg_tbl[name] in pseg_list:
+                print index, name.encode("utf-8"), cnt, vectorize.word_pesg_tbl[name]
                 break
         print_count = print_count + 1
 

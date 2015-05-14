@@ -1,5 +1,4 @@
 #-*- coding:utf-8 -*-
-import vec_config
 
 
 """ =================== file and text process
@@ -28,13 +27,14 @@ def get_lines_from_file_useful(filepath):
 
     useful_flag = True
     with open(filepath) as file_ob:
+        print filepath
         next(file_ob)
         for line in file_ob:
             data = line.split("\t")
-            group_id = data[0]
-            label1 = data[7]
+            group_id = data[1]
+            label1 = data[8]
             label2 = data[9]
-            valid = data[11]
+            valid = data[12]
 
             # check if is in the same group
             if group_id != cur_groupid:
@@ -109,13 +109,8 @@ def write_to_file(data, file_name):
     file_ob.close()
     return
 
-def main():
-
-    from_filepath = "../data/Interstellar.tsv"
-    lines = get_lines_from_file_useful(from_filepath)
-    texts = get_text_only_from_lines(lines)
-    to_file_path = "../data/Ins_text.txt"
-    write_to_file(texts, to_file_path)
 
 if __name__ == "__main__":
-    main()
+     sample_lines = get_lines_from_file_useful("../data/weibo.tsv")
+     for line in sample_lines:
+         print line
