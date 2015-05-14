@@ -1,6 +1,7 @@
 #-*- coding:utf-8 -*-
 import json
 import jieba
+import jieba.posseg as pseg
 import data_filter
 import re
 from parse import *
@@ -31,7 +32,7 @@ def cut(text):
 
     seg_list = jieba.cut(text, cut_all=False)
     # print " /".join(seg_list)
-
+    
     # filter the stopwords
     stop_words = get_stopwords()
     seg_list = [word for word in seg_list if word.encode("utf-8") not in stop_words]
