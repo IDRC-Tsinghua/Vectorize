@@ -59,7 +59,7 @@ class Vectorize(object):
         """
         self.dictionary = corpora.Dictionary(words_texts)
         self.dictionary.save(vec_config.dictionary_path)
-        print self.dictionary
+        # print self.dictionary
         return self.dictionary
 
     def get_token2id(self):
