@@ -35,7 +35,8 @@ def get_lines_from_file_useful(filepath):
             label1 = data[8]
             label2 = data[9]
             valid = data[12]
-
+            lines_res.append(line)
+            """
             # check if is in the same group
             if group_id != cur_groupid:
                 # not in the samp group
@@ -62,10 +63,12 @@ def get_lines_from_file_useful(filepath):
             temp_lines.append(line)
         # add the last group to group_lines
         group_lines.append(temp_lines)
-        file_ob.close()
+            """
+    file_ob.close()
 
         # get the group_lines of type:str list list
-    lines_res = [text for group in group_lines for text in group]
+    # lines_res = [text for group in group_lines for text in group]
+
     return lines_res
 
 
@@ -112,5 +115,3 @@ def write_to_file(data, file_name):
 
 if __name__ == "__main__":
      sample_lines = get_lines_from_file_useful("../data/weibo.tsv")
-     for line in sample_lines:
-         print line

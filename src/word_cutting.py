@@ -112,8 +112,6 @@ def filter_emoji_from_text(text):
     for emoji in emoji_res:
         text_filter = text_filter.replace(emoji, "")
 
-    if emoji_res != []:
-        print emoji, ' '.join(emoji_res)
     return emoji_res, text_filter
 
 def filter_syntax_from_text(text, syntax='@'):

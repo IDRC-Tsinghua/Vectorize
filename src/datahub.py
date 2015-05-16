@@ -87,9 +87,7 @@ def get_node_from_origin_line(line, vectorize):
     # dictionary init
     node_words = word_cutting.cut(node_text)
     bow_vector = vectorize.get_bow_vector(node_words)
-    print node_text
-    print bow_vector # test
-    
+       
     nodejson = {}
     nodejson['id'] = node_id
     nodejson['number'] = node_number
@@ -140,9 +138,10 @@ def main():
             if word_count_stat.get(index) != None:
                 word_count_stat[index] = word_count_stat[index] + cnt
             else:
-                word_count_stat[index] = 0
+                word_count_stat[index] = 1
 
         nodestr = json.dumps(node)
+        """
         if temp_id != node.get('id'):
             with open("../res/res_%d.txt" % cur, "w") as file_ob:
                 # print "----write to %d file now ----" % cur
@@ -156,14 +155,36 @@ def main():
             temp_strs.append(nodestr)
         else:
             temp_strs.append(nodestr)
-
+        """
+    sorted_cnt = sorted(word_count_stat.items(), key=operator.itemgetter(1),
+                        reverse=True)
+    dictionary_dict = vectorize.get_token2id()
+    print "dict len", len(dictionary_dict)
+    print "sorted len", len(sorted_cnt)
+    with open("word_dict.txt", "w") as file_ob:
+        
+        for (k, cnt) in sorted_cnt:
+            for (name, index) in dictionary_dict.items():
+                if index == int(k):
+                    # print index, name.encode("utf-8"), cnt, vectorize.word_pesg_tbl[name]
+                    line = str(index) + "\t" \
+                           + str(name.encode("utf-8")) + "\t" \
+                           + str(cnt) + "\t" \
+                           + str(vectorize.word_pesg_tbl[name])
+                    file_ob.write(line)
+                    file_ob.write("\n")
+                    break
+    file_ob.close()
+    """
     if temp_strs != []:
         with open("../res/res_%d.txt" % cur, "w") as file_ob:
             # print "----write to %d file now ----" % cur
             for line in temp_strs:
                 file_ob.write(line + "\n")
         file_ob.close()
+    """
 
+    """
     sorted_cnt = sorted(word_count_stat.items(), key=operator.itemgetter(1),
                         reverse=True)
     # sorted_cnt = sorted_cnt.reverse()
@@ -173,14 +194,12 @@ def main():
 
     pseg_list = "v vd vn vshi vyou vf vx vi vl vg a ad an ag al".split(" ")
     for (k,cnt) in sorted_cnt:
-        if print_count > 1000:
-            break
         for (name, index) in dictionary_dict.items():
             if index == int(k) and vectorize.word_pesg_tbl[name] in pseg_list:
                 print index, name.encode("utf-8"), cnt, vectorize.word_pesg_tbl[name]
                 break
         print_count = print_count + 1
-
+    """
 
 
     return
