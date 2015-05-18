@@ -54,9 +54,9 @@ def get_json_from_line(line, vectorize):
         label = int(valid)
     
     # text pre-procss
-    emoji_list, text = word_cutting.filter_emoji_from_text(text)
-    mention_list, text = word_cutting.filter_syntax_from_text(text, "@")
-    hashtag_list, text = word_cutting.filter_syntax_from_text(text, "#")
+    emoji_list, text = word_cutting.filter_emoji_from_textV2(text)
+    mention_list, text = word_cutting.filter_syntax_from_textV2(text, "@")
+    hashtag_list, text = word_cutting.filter_syntax_from_textV2(text, "#")
     words = word_cutting.cut(text)
     bow_vector = vectorize.get_bow_vector(words)
 

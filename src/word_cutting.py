@@ -94,6 +94,7 @@ def get_emoji():
             emoji = emoji.strip("\n")
             emoji_list.append(emoji)
     file_ob.close()
+    
     return emoji_list
 
 def filter_emoji_from_text(text):
@@ -104,6 +105,7 @@ def filter_emoji_from_text(text):
     # get all emoji that appeared
     # not delete the emoji in this turn, for store the repeate emoji
     for emoji in emoji_list:
+        
         if emoji in text:
             emoji_res.append(emoji)
 
@@ -112,7 +114,40 @@ def filter_emoji_from_text(text):
     for emoji in emoji_res:
         text_filter = text_filter.replace(emoji, "")
 
+    
     return emoji_res, text_filter
+
+def filter_emoji_from_textV2(text):
+    """
+    """
+    emoji_res = ["["+str(r.fixed[0])+"]" for r in findall("[{}]", text)]
+    text_filter = text
+    for emoji in emoji_res:
+        text_filter = text_filter.replace(emoji, "")
+    return emoji_res, text_filter
+
+def filter_syntax_from_textV2(text, syntax='@'):
+    """
+    """
+    syntax_res = []
+    text_filter = text
+    if syntax == '@':
+        syntax_res = [r.fixed[0] for r in findall("@{}:", text)]
+        syntax_res = syntax_res + [r.fixed[0] for r in findall("@{} ", text)]
+        syntax_res = syntax_res + [r.fixed[0] for r in findall("@{}(", text)]
+        syntax_res = syntax_res + [r.fixed[0] for r in findall("@{})", text)]
+        syntax_res = syntax_res + [r.fixed[0] for r in findall("@{}（", text)]
+        syntax_res = syntax_res + [r.fixed[0] for r in findall("@{}）]", text)]
+    elif syntax == '#':
+        syntax_res = [r.fixed[0] for r in findall("#{}#", text)]
+    else:
+        syntax_res = []
+    for s in syntax_res:
+        text_filter = text.replace(s, "")
+    text_filter = text_filter.replace(syntax, "")
+    return syntax_res, text_filter
+    
+
 
 def filter_syntax_from_text(text, syntax='@'):
     """
