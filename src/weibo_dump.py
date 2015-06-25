@@ -5,8 +5,10 @@ import utils
 from vectorize import Vectorize
 import operator
 import word_cutting
+from itertools import izip
 
-def get_json_from_line(line, vectorize):
+
+def get_json_from_line(line, vectorize, vector_y=None):
     """
     """
     """
@@ -22,7 +24,7 @@ def get_json_from_line(line, vectorize):
     user1,
     label2,
     user2,
-    valid,
+    valid,v
     ifrelated1,
     ifrelated2,
     topicid
@@ -38,7 +40,7 @@ def get_json_from_line(line, vectorize):
     text = data_of_line[4]
     parent = int(data_of_line[5])
     children = data_of_line[6]
-    
+    depth = int(data_of_line[7])
     label1 = data_of_line[8]
     label2 = data_of_line[10]
     valid = data_of_line[12]
@@ -59,7 +61,8 @@ def get_json_from_line(line, vectorize):
     hashtag_list, text = word_cutting.filter_syntax_from_textV2(text, "#")
     words = word_cutting.cut(text)
     bow_vector = vectorize.get_bow_vector(words)
-
+    svm = int(vector_y)
+        
     json_of_line = {}
     json_of_line['topicid'] = topicid
     json_of_line['threadid'] = threadid
@@ -67,13 +70,15 @@ def get_json_from_line(line, vectorize):
     json_of_line['username'] = username
     json_of_line['text'] = text
     json_of_line['vector'] = bow_vector
+    json_of_line['svm'] = svm
     json_of_line['parent'] = parent
     json_of_line['children'] = children
+    json_of_line['depth'] = depth
     json_of_line['label'] = label
     json_of_line['emoji'] = emoji_list
     json_of_line['mention'] = mention_list
     json_of_line['hashtag'] = hashtag_list
-    return json_of_line, bow_vector
+    return json_of_line
 
 def get_line_thread_topic():
     """
@@ -82,6 +87,9 @@ def get_line_thread_topic():
     # one topic one file
     vectorize = Vectorize()
     vectorize.dict_init_from_file("../data/weibo.tsv")
+    token2id = vectorize.get_token2id()
+    print "the dictionary's len: ", len(token2id)
+    
     lines_of_topic = {} # key: int, value: [[..], [..] ..]
     lines_of_topic_train = {}
     lines_of_topic_test = {}
@@ -89,8 +97,7 @@ def get_line_thread_topic():
     for i in xrange(51):
         lines_of_topic[str(i)] = []
         
-    with open ("../data/weibo.tsv") as file_ob:
-        next(file_ob)
+    with open ("../data/weiboV2.tsv", "r") as file_ob, open("svmmul_y.txt", "r") as vector_ob:
 
         header = "topicid" + "\t" \
                  + "docid" + "\t" \
@@ -104,9 +111,9 @@ def get_line_thread_topic():
         threadid_cur = ""
         thread_group = []
         topic_flag = None
-        for line in file_ob:
+        for line, vec_line in izip(file_ob, vector_ob):
 
-            json_of_line, bow_vector = get_json_from_line(line, vectorize)
+            json_of_line = get_json_from_line(line, vectorize, vec_line.rstrip())
             
             if json_of_line == None:
                 continue
@@ -134,8 +141,33 @@ def get_line_thread_topic():
     file_ob.close()
     return lines_of_topic
 
-    
-def generate_dataset():
+
+def pre_process_dataset():
+    """
+    """
+    lines = []
+    vectorize = Vectorize()
+    vectorize.dict_init_from_file("../data/weibo.tsv")
+    token2id = vectorize.get_token2id()
+    print "the dictionary's len: ", len(token2id)
+    with open("../data/weibo.tsv", "r") as file_ob:
+        next(file_ob)
+        for line in file_ob:
+            json_of_line, bow_vector = get_json_from_line(line, vectorize)
+            if json_of_line == None:
+                continue
+            lines.append(line)
+    file_ob.close()
+
+    with open("../data/weiboV2.tsv", "w") as file_ob:
+        for line in lines:
+            file_ob.write(line)
+    file_ob.close()
+    return
+
+
+
+def generate_dataset(percent=None):
     """
     """
     # init
@@ -151,10 +183,32 @@ def generate_dataset():
     lines_of_topic = get_line_thread_topic()
 
     print "line_numbers: ", line_numbers
+
+    if percent != None:
+        print "percent: ", percent
+        for fold in xrange(5):
+            for i in xrange(51):
+
+                thread_cur = 0
+                len_thread = len(lines_of_topic[str(i)])
+                print "len_thread: ", len_thread
+                with open("../data/%s/fold_%s/%s.txt" % \
+                          (str(percent), str(fold), str(i)), "w") as file_ob:
+                    
+                    for thread in lines_of_topic[str(i)]:
+                        if thread_cur * 100.0 / len_thread < percent:
+                        # fold
+                            if thread_cur % 5 == fold:
+                                for line in thread:
+                                    file_ob.write(line)
+                                    file_ob.write("\n")
+                            thread_cur = thread_cur + 1
+                file_ob.close()
+        return
+
     
     # write all the file
-    for i in xrange(51):
-
+    for i in xrange(51):        
         # divid to 5 folds
         for fold in xrange(5):
             print "write fold %s in topic %s" % (str(fold), str(i))
@@ -202,9 +256,54 @@ def generate_dataset():
                 cur = cur + 1
         file_ob.close()
         cur = 0
-        """                
-def main():
-    generate_dataset()
+        """
+def topic_polarity_stats():
+    """
+    """
+    vectorize = Vectorize()
+    vectorize.dict_init_from_file("../data/weibo.tsv")
+    token2id = vectorize.get_token2id()
+    print "the dictionary's len: ", len(token2id)
+
+
+    topic_polarity_cnt = []
+    for topicID in xrange(51):
+        topic_polarity_cnt.append([0, 0, 0])
+    print topic_polarity_cnt
     
+    with open("../data/weibo.tsv", "r") as file_ob:
+        next(file_ob)
+        for line in file_ob:
+            json_of_line, bow_vector = get_json_from_line(line, vectorize)
+            if json_of_line == None:
+                continue
+            topicid = json_of_line['topicid']
+            label = json_of_line['label']
+            topic_polarity_cnt[topicid][label+1] = topic_polarity_cnt[topicid][label+1] + 1
+    file_ob.close()
+
+    topic_id = 0
+    polarity_all_cnt = [0, 0, 0]
+    
+    for topic_cnt in topic_polarity_cnt:
+        print "topic %i" % (topic_id)
+
+        polarity_all_cnt[0] += topic_cnt[0]
+        polarity_all_cnt[1] += topic_cnt[1]
+        polarity_all_cnt[2] += topic_cnt[2]
+        for polarity in topic_cnt:
+            print polarity * 1.0 / sum(topic_cnt)
+        topic_id += 1
+
+    print polarity_all_cnt
+    return
+def main():
+    percent_list = [20, 40, 60, 80]
+
+    for percent_item in percent_list:
+        generate_dataset(percent=percent_item)
+    # topic_polarity_stats()
+    # pre_process_dataset()
+
 if __name__ == "__main__":
     main()

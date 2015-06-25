@@ -29,7 +29,6 @@ def cut(text):
                     type: str list
     """
 
-
     seg_list = jieba.cut(text, cut_all=False)
     # print " /".join(seg_list)
     # seg_list = pseg.cut(text) # w.word w.flag
@@ -134,6 +133,7 @@ def filter_syntax_from_textV2(text, syntax='@'):
     if syntax == '@':
         syntax_res = [r.fixed[0] for r in findall("@{}:", text)]
         syntax_res = syntax_res + [r.fixed[0] for r in findall("@{} ", text)]
+        syntax_res = syntax_res + [r.fixed[0] for r in findall("@{}\n", text)]
         syntax_res = syntax_res + [r.fixed[0] for r in findall("@{}(", text)]
         syntax_res = syntax_res + [r.fixed[0] for r in findall("@{})", text)]
         syntax_res = syntax_res + [r.fixed[0] for r in findall("@{}（", text)]
