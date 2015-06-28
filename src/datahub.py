@@ -115,11 +115,11 @@ def main():
     print "==========vectorize dict init...============"
     vectorize = Vectorize()
     # prepare str list list words
-    vectorize.dict_init_from_file("../data/weibo.tsv")
+    vectorize.dict_init_from_file("../data/weiboV2.tsv")
 
     
     print "==========load sample data==========="
-    sample_lines = utils.get_lines_from_file_useful("../data/weibo.tsv")
+    sample_lines = utils.get_lines_from_file_useful("../data/weiboV2.tsv")
     print len(sample_lines)
 
     # begin to write files
@@ -161,6 +161,7 @@ def main():
     dictionary_dict = vectorize.get_token2id()
     print "dict len", len(dictionary_dict)
     print "sorted len", len(sorted_cnt)
+    print "word_count_dict stat: ", len(word_count_stat)
     with open("word_dict.txt", "w") as file_ob:
         
         for (k, cnt) in sorted_cnt:
@@ -175,6 +176,14 @@ def main():
                     file_ob.write("\n")
                     break
     file_ob.close()
+
+    with open("token_dict.txt", "w") as file_ob:
+        for (k,v) in dictionary_dict.items():
+            line = str(k.encode("utf-8")) + "\t" + str(v)
+            file_ob.write(line)
+            file_ob.write("\n")
+    file_ob.close()
+    
     """
     if temp_strs != []:
         with open("../res/res_%d.txt" % cur, "w") as file_ob:
