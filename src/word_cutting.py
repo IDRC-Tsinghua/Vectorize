@@ -1,11 +1,12 @@
 #-*- coding:utf-8 -*-
 import json
 import jieba
+import jieba.posseg as pseg
 import data_filter
 import re
 from parse import *
 import vec_config
-
+import jieba.posseg as pseg
 
 def load_thirdparty_words(filepath):
     """
@@ -28,13 +29,20 @@ def cut(text):
                     type: str list
     """
 
-
     seg_list = jieba.cut(text, cut_all=False)
     # print " /".join(seg_list)
-
+    # seg_list = pseg.cut(text) # w.word w.flag
     # filter the stopwords
     stop_words = get_stopwords()
-    seg_list = [word for word in seg_list if word.encode("utf-8") not in stop_words]
+    seg_list = [w for w in seg_list if w.encode("utf-8") not in stop_words]
+    return list(seg_list)
+
+def cut_with_pseg(text):
+
+    seg_list = pseg.cut(text)
+    stop_words = get_stopwords()
+    seg_list = [w for w in seg_list if w.word.encode("utf-8") not in stop_words]
+    
     return list(seg_list)
 
 """ ================== emoji mention and hashtag process
@@ -85,6 +93,7 @@ def get_emoji():
             emoji = emoji.strip("\n")
             emoji_list.append(emoji)
     file_ob.close()
+    
     return emoji_list
 
 def filter_emoji_from_text(text):
@@ -95,6 +104,7 @@ def filter_emoji_from_text(text):
     # get all emoji that appeared
     # not delete the emoji in this turn, for store the repeate emoji
     for emoji in emoji_list:
+        
         if emoji in text:
             emoji_res.append(emoji)
 
@@ -103,9 +113,41 @@ def filter_emoji_from_text(text):
     for emoji in emoji_res:
         text_filter = text_filter.replace(emoji, "")
 
-    if emoji_res != []:
-        print emoji, ' '.join(emoji_res)
+    
     return emoji_res, text_filter
+
+def filter_emoji_from_textV2(text):
+    """
+    """
+    emoji_res = ["["+str(r.fixed[0])+"]" for r in findall("[{}]", text)]
+    text_filter = text
+    for emoji in emoji_res:
+        text_filter = text_filter.replace(emoji, "")
+    return emoji_res, text_filter
+
+def filter_syntax_from_textV2(text, syntax='@'):
+    """
+    """
+    syntax_res = []
+    text_filter = text
+    if syntax == '@':
+        syntax_res = [r.fixed[0] for r in findall("@{}:", text)]
+        syntax_res = syntax_res + [r.fixed[0] for r in findall("@{} ", text)]
+        syntax_res = syntax_res + [r.fixed[0] for r in findall("@{}\n", text)]
+        syntax_res = syntax_res + [r.fixed[0] for r in findall("@{}(", text)]
+        syntax_res = syntax_res + [r.fixed[0] for r in findall("@{})", text)]
+        syntax_res = syntax_res + [r.fixed[0] for r in findall("@{}（", text)]
+        syntax_res = syntax_res + [r.fixed[0] for r in findall("@{}）]", text)]
+    elif syntax == '#':
+        syntax_res = [r.fixed[0] for r in findall("#{}#", text)]
+    else:
+        syntax_res = []
+    for s in syntax_res:
+        text_filter = text.replace(s, "")
+    text_filter = text_filter.replace(syntax, "")
+    return syntax_res, text_filter
+    
+
 
 def filter_syntax_from_text(text, syntax='@'):
     """
@@ -157,10 +199,12 @@ def filter_syntax_from_text(text, syntax='@'):
                     else: # c = @
                         c_flag = True
 
+    """                    
     if mention_list != []:
         print syntax
         for mention in mention_list:
             print mention
+    """
     return mention_list, text
 
 def get_weibos():
@@ -174,18 +218,3 @@ def get_weibos():
             if word:
                 weibo_list.append(word.decode("utf-8"))
     return weibo_list
-
-
-
-if __name__ == "__main__":
-
-
-    """
-    emoji_list, text = filter_emoji_from_text("今天天气不错[笑哈哈][草泥马]")
-    print emoji_list, text
-
-    mention_list, text = filter_syntax_from_text("今天天气不错@火神 #天气预报  ", '@')
-    print mention_list, text
-    hashtag_list, text = filter_syntax_from_text(text, '#')
-    print hashtag_list, text
-    """
