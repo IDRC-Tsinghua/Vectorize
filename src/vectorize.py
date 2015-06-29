@@ -2,6 +2,7 @@
 import vec_config
 import json
 from gensim import corpora, models
+import gensim.models.tfidfmodel
 import word_cutting
 import utils
 
@@ -22,11 +23,13 @@ class Vectorize(object):
         word_cutting.load_thirdparty_words("../dict/favourate.txt")
         self.dictionary = None
         self.word_pesg_tbl = {} # the word-pesg hashtable
+	self.words_doc = None
+	self.tfidf = None
 
-    def dict_init_from_file(self, filepath):
-        """
-        """
-        lines = utils.get_line_from_file(filepath)
+    def gen_words_doc(self, filepath):
+	"""
+	"""
+	lines = utils.get_line_from_file(filepath)
         texts = utils.get_text_only_from_lines(lines)
         text_filters = []
         for text in texts:
@@ -52,9 +55,15 @@ class Vectorize(object):
         stop_words = word_cutting.get_stopwords()
         ## test
         words_doc = [[word for word in doc if word.encode("utf-8") not in stop_words] for doc in words_doc]
+	self.words_doc = words_doc
+	return
 
+    def dict_init_from_file(self, filepath):
+        """
+        """
+		
         # words_doc = [[] for doc in words_doc]
-        self.dict_init_from_texts(words_doc)
+        self.dict_init_from_texts(self.words_doc)
         return
 
     def dict_init_from_texts(self, words_texts):
@@ -91,3 +100,17 @@ class Vectorize(object):
         assert(self.dictionary != None)
         bow_vector = self.dictionary.doc2bow(words)
         return bow_vector
+	
+    def tfidf_init(self):
+	"""
+	"""
+	self.tfidf = TfidfModel(self.words_doc) 
+	return
+
+    def get_tfidf(self, doc):
+	"""
+	transfor the doc to the tfidf space
+	"""
+	assert(self.tfidf) != None
+	return self.tfidf[doc]
+

@@ -3,6 +3,8 @@ import os
 import json
 import pdb
 import math
+import operator
+from vectorize import Vectorize 
 
 def gen_vectors_from_jsondata(filename):
     """
@@ -47,6 +49,15 @@ def gen_all_data(rootpath):
                     vector_list += gen_vectors_from_jsondata(_cur+"/"+filename)
     # pdb.set_trace()
     return vector_list
+
+def gen_tfidf():
+    """
+    """
+    vectorize = Vectorize()
+    vectorize.gen_words_doc("../data/weibo.tsv")
+    vectorize.tfidf_init()
+    return vectorize
+
 
 def gen_prob_table(vector_list, len_of_idx, len_of_doc):
     """
@@ -189,6 +200,16 @@ def main():
     #prob_tbl = gen_prob_table(vector_list,19902 ,14733)
     #prob_y = gen_prob_y(vector_list)
     info_gain = calculate_info_gain(vector_list, 19902, 14733)
+    sorted_ig = sorted(info_gian.items(), key=operator.itemgetter(0))
+    sorted_ig = sorted_ig.reverse()
+    verbose = 100
+    cur = 0
+    for k, v in sorted_ig.items():
+        if cur < verbose:
+            print k
+            cur += 1
+        else:
+            break
     pdb.set_trace()
     return
 

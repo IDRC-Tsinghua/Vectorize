@@ -86,6 +86,7 @@ def get_line_thread_topic():
      # init
     # one topic one file
     vectorize = Vectorize()
+    vectorize.gen_words_doc("../data/weibo.tsv")
     vectorize.dict_init_from_file("../data/weibo.tsv")
     token2id = vectorize.get_token2id()
     print "the dictionary's len: ", len(token2id)
