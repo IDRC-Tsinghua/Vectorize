@@ -210,7 +210,6 @@ def main():
             cur += 1
         else:
             break
-    pdb.set_trace()
     return
 
 if __name__ == "__main__":
