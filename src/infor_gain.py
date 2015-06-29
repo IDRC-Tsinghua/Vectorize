@@ -151,15 +151,15 @@ def calculate_info_gain(vector_list, len_of_idx, len_of_doc):
     H_C = sum([p_y * math.log(p_y,2) for k, p_y in prob_y.items() ])
 
     for idx in xrange(1, len_of_idx):
-        p_t = prob_tbl[idx][0]
-        p_c_neg_given_t = prob_tbl[idx][1]
-        p_c_neu_given_t = prob_tbl[idx][2]
-        p_c_pos_given_t = prob_tbl[idx][3]
+        p_t = prob_tbl[idx][0] or 1
+        p_c_neg_given_t = prob_tbl[idx][1] or 1
+        p_c_neu_given_t = prob_tbl[idx][2] or 1
+        p_c_pos_given_t = prob_tbl[idx][3] or 1
 
-        p_non_t = prob_non_tbl[idx][0]
-        p_non_c_neg_given_t = prob_non_tbl[idx][1]
-        p_non_c_neu_given_t = prob_non_tbl[idx][2]
-        p_non_c_pos_given_t = prob_non_tbl[idx][3]
+        p_non_t = prob_non_tbl[idx][0] or 1
+        p_non_c_neg_given_t = prob_non_tbl[idx][1] or 1
+        p_non_c_neu_given_t = prob_non_tbl[idx][2] or 1
+        p_non_c_pos_given_t = prob_non_tbl[idx][3] or 1
 
         # Trick debug
         print "p_t", p_t
@@ -170,10 +170,6 @@ def calculate_info_gain(vector_list, len_of_idx, len_of_doc):
         print "p_non_c_neg_given_t", p_non_c_neg_given_t
         print "p_non_c_neu_given_t", p_non_c_neu_given_t
         print "p_non_c_pos_given_t", p_non_c_pos_given_t
-
-        
-        if p_t == 0:
-            continue
 
         info_gain[idx] = H_C + \
                          p_t * p_c_neg_given_t * math.log(p_c_neg_given_t, 2) + \
