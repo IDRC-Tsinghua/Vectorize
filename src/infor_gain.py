@@ -161,6 +161,17 @@ def calculate_info_gain(vector_list, len_of_idx, len_of_doc):
         p_non_c_neu_given_t = prob_non_tbl[idx][2]
         p_non_c_pos_given_t = prob_non_tbl[idx][3]
 
+        # Trick debug
+        print "p_t", p_t
+        print "p_c_neg_given_t", p_c_neg_given_t
+        print "p_c_neu_given_t", p_c_neu_given_t
+        print "p_c_pos_given_t", p_c_pos_given_t
+        print "p_non_t", p_non_t
+        print "p_non_c_neg_given_t", p_non_c_neg_given_t
+        print "p_non_c_neu_given_t", p_non_c_neu_given_t
+        print "p_non_c_pos_given_t", p_non_c_pos_given_t
+
+        
         if p_t == 0:
             continue
 
