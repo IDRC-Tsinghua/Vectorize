@@ -83,13 +83,14 @@ def gen_prob_table(vector_list, len_of_idx, len_of_doc):
               format: {"idx": ( sum(t), sum(c_{-1}|t),      )}
 
     """
-    prob_tbl = dict( (k, [0.0]*4) for k in xrange(1, len_of_idx))
+    prob_tbl = dict( (k, [0.0]*4) for k in xrange(0, len_of_idx))
 
     for item in vector_list:
         y = item[0]
         vec = item[1]
         for v in vec:
             # sum(t) acc
+            print v
             prob_tbl[v][0] += 1
             # sum(c|t) acc
             prob_tbl[v][y+2] += 1
@@ -153,6 +154,10 @@ def calculate_info_gain(vector_list, len_of_idx, len_of_doc):
     """
     calculate the information gain by the probability table.
 
+    Return:
+    -------
+    info_gain: dict
+    
     """
     info_gain = dict( (k, 0.0) for k in xrange(1, len_of_idx))
 
@@ -199,17 +204,19 @@ def main():
     vector_list = gen_all_data("../data/fold_data/")
     #prob_tbl = gen_prob_table(vector_list,19902 ,14733)
     #prob_y = gen_prob_y(vector_list)
-    info_gain = calculate_info_gain(vector_list, 19902, 14733)
-    sorted_ig = sorted(info_gian.items(), key=operator.itemgetter(0))
-    sorted_ig = sorted_ig.reverse()
-    verbose = 100
-    cur = 0
-    for k, v in sorted_ig.items():
-        if cur < verbose:
-            print k
-            cur += 1
-        else:
-            break
+    
+    # info_gain = calculate_info_gain(vector_list, 39624, 14733)
+    info_gain = calculate_info_gain(vector_list, 62873, 14733)
+    for k,v in info_gain.items():
+        print k
+    sorted_ig = sorted(info_gain.items(), key=operator.itemgetter(1))
+    for x in xrange(-1, -1000, -1):
+        print sorted_ig[x]
+    with open("info_gain.txt", "w") as file_ob:
+        for x in xrange(-1, -1000, -1):
+            file_ob.write(str(sorted_ig[x][0])+"\n")
+    # sorted_ig = sorted_ig.reverse()
+    file_ob.close()
     return
 
 if __name__ == "__main__":

@@ -2,10 +2,9 @@
 import vec_config
 import json
 from gensim import corpora, models
-import gensim.models.tfidfmodel
 import word_cutting
 import utils
-
+import pdb
 """
 Return Function:
 ----------------
@@ -39,10 +38,13 @@ class Vectorize(object):
             text_filters.append(text_filter)
         words_doc = []
 
-        # for text in text_filters:
-        #    words_doc.append(word_cutting.cut(text))
+        for text in text_filters:
+            words = word_cutting.cut(text)
+            words_doc.append(words)
+        """
         for text in text_filters:
             text_pesg = word_cutting.cut_with_pseg(text)
+            
             # set the pesg to the hashtable
             for word_pesg in text_pesg:
                 self.word_pesg_tbl[word_pesg.word] = word_pesg.flag
@@ -50,7 +52,7 @@ class Vectorize(object):
             doc = []
             doc = [w.word for w in text_pesg]
             words_doc.append(doc)
-        
+        """
         # filter stop words
         stop_words = word_cutting.get_stopwords()
         ## test
@@ -61,7 +63,6 @@ class Vectorize(object):
     def dict_init_from_file(self, filepath):
         """
         """
-		
         # words_doc = [[] for doc in words_doc]
         self.dict_init_from_texts(self.words_doc)
         return
@@ -104,7 +105,9 @@ class Vectorize(object):
     def tfidf_init(self):
 	"""
 	"""
-	self.tfidf = TfidfModel(self.words_doc) 
+        print "=== tf-idf init ==="
+        index_doc = [self.get_bow_vector(words) for words in self.words_doc]
+	self.tfidf = models.TfidfModel(index_doc) 
 	return
 
     def get_tfidf(self, doc):

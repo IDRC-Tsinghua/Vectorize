@@ -29,13 +29,28 @@ def cut(text):
                     type: str list
     """
 
+    ## simplt cut
     seg_list = jieba.cut(text, cut_all=False)
-    # print " /".join(seg_list)
-    # seg_list = pseg.cut(text) # w.word w.flag
-    # filter the stopwords
+
+    ## bigram or trigram
+    # text = text.decode("utf-8")
+    # seg_list = [text[i:i+3] for i in xrange(len(text)-2)]
+
     stop_words = get_stopwords()
     seg_list = [w for w in seg_list if w.encode("utf-8") not in stop_words]
     return list(seg_list)
+
+def bigram(seg_list):
+    """
+    """
+    seg_bigram = []
+    len_of_seg = len(seg_list)
+    if len_of_seg < 2:
+        return seg_list
+    for i in xrange(len_of_seg-1):
+        bi_word = ''.join(seg_list[i:i+2])
+        seg_bigram.append(bi_word)
+    return seg_bigram
 
 def cut_with_pseg(text):
 
