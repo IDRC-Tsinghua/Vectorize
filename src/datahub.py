@@ -30,9 +30,6 @@ def get_text_from_line(line):
     text = row_data[3]
     return text
 
-
-
-
 def get_node_from_origin_line(line, vectorize):
     """ Form a NODE structure from origin line
     Parameters:

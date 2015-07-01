@@ -6,7 +6,7 @@ from vectorize import Vectorize
 import operator
 import word_cutting
 from itertools import izip
-
+import pdb
 
 def get_json_from_line(line, vectorize, vector_y=None):
     """
@@ -59,8 +59,18 @@ def get_json_from_line(line, vectorize, vector_y=None):
     emoji_list, text = word_cutting.filter_emoji_from_textV2(text)
     mention_list, text = word_cutting.filter_syntax_from_textV2(text, "@")
     hashtag_list, text = word_cutting.filter_syntax_from_textV2(text, "#")
+
+    # words and bigram ( or trigram
     words = word_cutting.cut(text)
     bow_vector = vectorize.get_bow_vector(words)
+
+    # if info_gain
+    # info_gain_list = get_info_gain_list()
+    # bow_vector = [v for v in bow_vector if str(v[0]) in info_gain_list]
+    # pdb.set_trace()
+
+    # if tfidf
+    bow_vector = vectorize.get_tfidf(bow_vector)
     svm = int(vector_y)
         
     json_of_line = {}
@@ -86,8 +96,9 @@ def get_line_thread_topic():
      # init
     # one topic one file
     vectorize = Vectorize()
-    vectorize.gen_words_doc("../data/weibo.tsv")
-    vectorize.dict_init_from_file("../data/weibo.tsv")
+    vectorize.gen_words_doc("../data/weiboV2.tsv")
+    vectorize.dict_init_from_file("../data/weiboV2.tsv")
+    vectorize.tfidf_init()
     token2id = vectorize.get_token2id()
     print "the dictionary's len: ", len(token2id)
     
@@ -107,7 +118,7 @@ def get_line_thread_topic():
                  + "parent" + "\t" \
                  + "children" + "\t" \
                  + "label"
-        print header
+        # print header
 
         threadid_cur = ""
         thread_group = []
@@ -118,7 +129,7 @@ def get_line_thread_topic():
             
             if json_of_line == None:
                 continue
-            line_numbers = line_numbers + 1
+            fline_numbers = line_numbers + 1
             threadid = json_of_line['threadid']
             topicid = json_of_line['topicid']
             
@@ -148,10 +159,10 @@ def pre_process_dataset():
     """
     lines = []
     vectorize = Vectorize()
-    vectorize.dict_init_from_file("../data/weibo.tsv")
+    vectorize.dict_init_from_file("../data/weiboV2.tsv")
     token2id = vectorize.get_token2id()
     print "the dictionary's len: ", len(token2id)
-    with open("../data/weibo.tsv", "r") as file_ob:
+    with open("../data/weiboV2.tsv", "r") as file_ob:
         next(file_ob)
         for line in file_ob:
             json_of_line, bow_vector = get_json_from_line(line, vectorize)
@@ -160,7 +171,7 @@ def pre_process_dataset():
             lines.append(line)
     file_ob.close()
 
-    with open("../data/weiboV2.tsv", "w") as file_ob:
+    with open("../data/weibo.tsv", "w") as file_ob:
         for line in lines:
             file_ob.write(line)
     file_ob.close()
@@ -168,7 +179,7 @@ def pre_process_dataset():
 
 
 
-def generate_dataset(percent=None):
+def generate_dataset():
     """
     """
     # init
@@ -185,35 +196,12 @@ def generate_dataset(percent=None):
 
     print "line_numbers: ", line_numbers
 
-    if percent != None:
-        print "percent: ", percent
-        for fold in xrange(5):
-            for i in xrange(51):
-
-                thread_cur = 0
-                len_thread = len(lines_of_topic[str(i)])
-                print "len_thread: ", len_thread
-                with open("../data/%s/fold_%s/%s.txt" % \
-                          (str(percent), str(fold), str(i)), "w") as file_ob:
-                    
-                    for thread in lines_of_topic[str(i)]:
-                        if thread_cur * 100.0 / len_thread < percent:
-                        # fold
-                            if thread_cur % 5 == fold:
-                                for line in thread:
-                                    file_ob.write(line)
-                                    file_ob.write("\n")
-                            thread_cur = thread_cur + 1
-                file_ob.close()
-        return
-
-    
     # write all the file
     for i in xrange(51):        
         # divid to 5 folds
         for fold in xrange(5):
             print "write fold %s in topic %s" % (str(fold), str(i))
-            with open("../data/fold_%s/%s.txt" %(str(fold), str(i)), "w") as file_ob:
+            with open("../data/fold_data/fold_%s/%s.txt" %(str(fold), str(i)), "w") as file_ob:
                 thread_cur = 0
                 for thread in lines_of_topic[str(i)]:
                     # fold
@@ -223,9 +211,7 @@ def generate_dataset(percent=None):
                             file_ob.write("\n")
                     thread_cur = thread_cur + 1
             file_ob.close()
-            
 
-        """
         print "writing data %s to the dataset" % str(i)
         with open("../dataset/%s.txt" % (str(i)), "w") as file_ob:
             for thread in lines_of_topic[str(i)]:
@@ -257,12 +243,12 @@ def generate_dataset(percent=None):
                 cur = cur + 1
         file_ob.close()
         cur = 0
-        """
+    return
 def topic_polarity_stats():
     """
     """
     vectorize = Vectorize()
-    vectorize.dict_init_from_file("../data/weibo.tsv")
+    vectorize.dict_init_from_file("../data/weiboV2.tsv")
     token2id = vectorize.get_token2id()
     print "the dictionary's len: ", len(token2id)
 
@@ -272,7 +258,7 @@ def topic_polarity_stats():
         topic_polarity_cnt.append([0, 0, 0])
     print topic_polarity_cnt
     
-    with open("../data/weibo.tsv", "r") as file_ob:
+    with open("../data/weiboV2.tsv", "r") as file_ob:
         next(file_ob)
         for line in file_ob:
             json_of_line, bow_vector = get_json_from_line(line, vectorize)
@@ -298,13 +284,20 @@ def topic_polarity_stats():
 
     print polarity_all_cnt
     return
-def main():
-    percent_list = [20, 40, 60, 80]
 
+def get_info_gain_list():
+    info_gain_list = []
+    with open("info_gain.txt") as file_ob:
+        for line in file_ob:
+            info_gain_list.append(line.strip())
+    return info_gain_list
+def main():
+    # percent_list = [20, 40, 60, 80]
+    """
     for percent_item in percent_list:
         generate_dataset(percent=percent_item)
-    # topic_polarity_stats()
-    # pre_process_dataset()
+    """
+    generate_dataset()
 
 if __name__ == "__main__":
     main()
