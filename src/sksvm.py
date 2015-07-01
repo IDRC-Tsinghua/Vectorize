@@ -99,8 +99,19 @@ if __name__ == "__main__":
     train_X, train_y = gen_data(feature_dict, emoji_dict, 1244, vectorize, "train")
     test_X, test_y = gen_data(feature_dict, emoji_dict, 1244, vectorize, "test")
 
-    clf = SVC(multi_class="ovr",
+    clf = SVC(degree=3,
+              kernel="rbf",
               class_weight={1:0.2, 2:0.4, 3:0.4})
     print "=== train SVM model... === "
     clf.fit(train_X, train_y)
-    clf.predict(test_y)
+    pred_y_res = clf.predict(test_X)
+
+    accuracy_cnt = 0
+    for pred_y, label_y in zip(pred_y_res, test_y):
+        if pred_y == label_y:
+            accuracy_cnt += 1
+    print accuracy_cnt
+    print accuracy_cnt * 1.0 / len(test_y)
+    
+
+    
