@@ -65,12 +65,12 @@ def get_json_from_line(line, vectorize, vector_y=None):
     bow_vector = vectorize.get_bow_vector(words)
 
     # if info_gain
-    # info_gain_list = get_info_gain_list()
-    # bow_vector = [v for v in bow_vector if str(v[0]) in info_gain_list]
+    info_gain_list = get_info_gain_list(num=4000)
+    bow_vector = [v for v in bow_vector if str(v[0]) in info_gain_list]
     # pdb.set_trace()
 
     # if tfidf
-    bow_vector = vectorize.get_tfidf(bow_vector)
+    # bow_vector = vectorize.get_tfidf(bow_vector)
     svm = int(vector_y)
         
     json_of_line = {}
@@ -285,10 +285,10 @@ def topic_polarity_stats():
     print polarity_all_cnt
     return
 
-def get_info_gain_list():
+def get_info_gain_list(num=1000):
     info_gain_list = []
     with open("info_gain.txt") as file_ob:
-        for line in file_ob:
+        for cur,line in zip(xrange(num),file_ob):
             info_gain_list.append(line.strip())
     return info_gain_list
 def main():
