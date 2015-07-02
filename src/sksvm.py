@@ -33,7 +33,7 @@ def get_all_emoji_dict():
                     for emoji in node_emoji:
                         emoji_htb[emoji] = 1
             file_ob.close()
-    start_index = 1000
+    start_index = 4000
     for emoji, val in emoji_htb.items():
         emoji_dict[emoji] = start_index
         start_index += 1

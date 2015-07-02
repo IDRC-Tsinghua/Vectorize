@@ -7,6 +7,8 @@ import re
 from parse import *
 import vec_config
 import jieba.posseg as pseg
+import pdb
+
 
 def load_thirdparty_words(filepath):
     """
@@ -33,9 +35,12 @@ def cut(text):
     seg_list = jieba.cut(text, cut_all=False)
 
     ## bigram or trigram
-    # text = text.decode("utf-8")
-    # seg_list = [text[i:i+3] for i in xrange(len(text)-2)]
+    text = text.decode("utf-8")
+    bi_seg_list = [text[i:i+2] for i in xrange(len(text)-1)]
+    tri_seg_list = [text[i:i+3] for i in xrange(len(text)-2)]
 
+    seg_list = list(seg_list) + bi_seg_list + tri_seg_list
+    seg_list = list(set(seg_list))
     stop_words = get_stopwords()
     seg_list = [w for w in seg_list if w.encode("utf-8") not in stop_words]
     return list(seg_list)
