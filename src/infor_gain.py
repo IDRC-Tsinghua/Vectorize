@@ -50,15 +50,6 @@ def gen_all_data(rootpath):
     # pdb.set_trace()
     return vector_list
 
-def gen_tfidf():
-    """
-    """
-    vectorize = Vectorize()
-    vectorize.gen_words_doc("../data/weibo.tsv")
-    vectorize.tfidf_init()
-    return vectorize
-
-
 def gen_prob_table(vector_list, len_of_idx, len_of_doc):
     """
     generate the probability of each token(germ)
@@ -206,14 +197,15 @@ def main():
     #prob_y = gen_prob_y(vector_list)
     
     # info_gain = calculate_info_gain(vector_list, 39624, 14733)
-    info_gain = calculate_info_gain(vector_list, 62873, 14733)
+    # info_gain = calculate_info_gain(vector_list, 62873, 14733)
+    info_gain = calculate_info_gain(vector_list, 108120, 14733)
     for k,v in info_gain.items():
         print k
     sorted_ig = sorted(info_gain.items(), key=operator.itemgetter(1))
-    for x in xrange(-1, -1000, -1):
+    for x in xrange(-1, -8000, -1):
         print sorted_ig[x]
     with open("info_gain.txt", "w") as file_ob:
-        for x in xrange(-1, -1000, -1):
+        for x in xrange(-1, -8000, -1):
             file_ob.write(str(sorted_ig[x][0])+"\n")
     # sorted_ig = sorted_ig.reverse()
     file_ob.close()
